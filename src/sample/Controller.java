@@ -10,7 +10,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -21,26 +20,19 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-    @FXML private GridPane background;  //GridPane from sample.fxml
     @FXML private Pane field;
 
     @FXML private RadioButton peaceful;
     @FXML private RadioButton easy;
     @FXML private RadioButton medium;
     @FXML private RadioButton hard;
-    final ToggleGroup difficulty = new ToggleGroup();
+    private final ToggleGroup difficulty = new ToggleGroup();
     private int mode = 0;
 
     private final int k = 100000000;   //constant required for long range
     @Override
     public void initialize(URL url, ResourceBundle resource){
-/*       Pane field = new Pane();      //Creating field...
-        field.setStyle("-fx-background-color: white;");
-        field.setMinWidth(1200);
-        field.setMinHeight(800);
-        field.setMaxWidth(1200);
-        field.setMaxHeight(800);
-        background.add(field,0,0);  //..and placing is inside background*/
+
         Electron ball = new Electron( 7 );  //creating ball
         field.getChildren().add( ball );
         ArrayList<Source> sources = new ArrayList<>();  //creating array for sources
