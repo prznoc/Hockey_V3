@@ -36,6 +36,14 @@ class Electron extends Circle {
         locX = 100;
         locY = 400;
     }
+    void bounce(){
+        if (locX < 1100 || locX >1150) veloX = veloX * (-1);
+        else veloY = veloY*(-1);
+    }
+
+    void pounce(){
+        veloX = veloX * (-1);
+    }
 }
 
 class Source extends Circle {

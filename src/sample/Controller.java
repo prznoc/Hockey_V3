@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+
+
 public class Controller implements Initializable {
     @FXML private Pane field;
 
@@ -39,7 +41,9 @@ public class Controller implements Initializable {
     @FXML private Button pause;
     private int mode = 0; // 0 - stop, 1 - work, 2 - win/lost
 
-    private final int k = 100000000;   //constant required for long range
+    private ArrayList<Rectangle> er = new ArrayList<>();
+    private ArrayList<Rectangle> mr = new ArrayList<>();
+    private ArrayList<Rectangle> hr = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resource){
@@ -53,10 +57,14 @@ public class Controller implements Initializable {
         medium.setToggleGroup(difficulty);
         hard.setToggleGroup(difficulty);
 
-        ArrayList<Rectangle> er = new ArrayList<>();
-        ArrayList<Rectangle> mr = new ArrayList<>();
-        ArrayList<Rectangle> hr = new ArrayList<>();
-        addRectangles(er, mr, hr);
+        Rectangle post1 = new Rectangle(1100,340,50,5);
+        Rectangle post2 = new Rectangle(1100,455,50,5);
+        Rectangle backpost = new Rectangle (1145, 345, 5, 110);
+        field.getChildren().add(post1);
+        field.getChildren().add(post2);
+        field.getChildren().add(backpost);
+
+        addRectangles();
         for(Rectangle rect: er){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
         for(Rectangle rect: mr){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
         for(Rectangle rect: hr){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
@@ -124,7 +132,9 @@ public class Controller implements Initializable {
                 ball.change();
                 ball.setCenterX(ball.locX);
                 ball.setCenterY(ball.locY);
-                collisionChecker(er,mr,hr,ball, this);
+                boundary_checker(ball, this);
+                collision_checker(ball, this);
+                goal_check(post1,post2,backpost,ball, this);
             }
         };
 
@@ -166,6 +176,7 @@ public class Controller implements Initializable {
 
     private void DetermineForce(Electron elec, ArrayList<Source> sources, AnimationTimer timer){
         for(Source source: sources){
+            final int k = 100000000;   //constant required for long range
             double r = Math.sqrt(Math.pow(elec.locX - source.getCenterX(),2)+Math.pow(elec.locY - source.getCenterY(),2))/1.0;
             if(r<14){   //collision check
                 timer.stop();
@@ -185,7 +196,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private void addRectangles(ArrayList<Rectangle> er ,ArrayList<Rectangle> mr,ArrayList<Rectangle> hr){
+    private void addRectangles(){
         Rectangle rec1 = new Rectangle(300,100,3,700);
         Rectangle rec2 = new Rectangle(500,100,3,700);
         Rectangle rec3 = new Rectangle(700,100,3,700);
@@ -194,8 +205,7 @@ public class Controller implements Initializable {
         hr.add(rec1);
     }
 
-    private void collisionChecker(ArrayList<Rectangle> er ,ArrayList<Rectangle> mr,ArrayList<Rectangle> hr, Electron ball,
-                                  AnimationTimer timer){
+    private void collision_checker(Electron ball, AnimationTimer timer){
         if (diff > 0){
             for(Rectangle rect: er){
                 Shape intersect = Shape.intersect(rect, ball);
@@ -227,4 +237,34 @@ public class Controller implements Initializable {
             }
         }
     }
+
+    private void goal_check(Rectangle post1, Rectangle post2, Rectangle backpost, Electron ball, AnimationTimer timer){
+        Shape intersect1 = Shape.intersect(post1, ball);
+        Shape intersect2 = Shape.intersect(post2, ball);
+        Shape intersect_back = Shape.intersect(backpost, ball);
+        if ((intersect1.getBoundsInLocal().getWidth() != -1) || (intersect2.getBoundsInLocal().getWidth() != -1)) {
+            ball.bounce();
+        }
+        else if (intersect_back.getBoundsInLocal().getWidth() != -1) {
+            if (ball.locX > 1150) ball.pounce();
+            else win(timer);
+        }
+    }
+
+    private void win(AnimationTimer timer){
+        timer.stop();
+        messages.setText("You Win");
+        mode = 2;
+    }
+
+    private void boundary_checker(Electron ball, AnimationTimer timer){
+        if(ball.locX < 0 || ball.locY > 1200 || ball.locY < 0 || ball.locY > 800){
+            timer.stop();
+            messages.setText("You lost");
+            mode = 2;
+        }
+
+    }
+
+
 }
