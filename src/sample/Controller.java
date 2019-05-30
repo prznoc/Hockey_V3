@@ -3,12 +3,11 @@ package sample;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -29,13 +28,19 @@ public class Controller implements Initializable {
     @FXML private RadioButton medium;
     @FXML private RadioButton hard;
     private final ToggleGroup difficulty = new ToggleGroup();
-    private int mode = 0;
+    private int diff = 0;  //current difficulty
 
     @FXML private Text messages;
     @FXML private Text mass_counter;
     @FXML private ScrollBar mass_changer;
 
+    @FXML private Button start;
+    @FXML private Button reset;
+    @FXML private Button pause;
+    private int mode = 0; // 0 - stop, 1 - work, 2 - win/lost
+
     private final int k = 100000000;   //constant required for long range
+
     @Override
     public void initialize(URL url, ResourceBundle resource){
 
@@ -79,25 +84,25 @@ public class Controller implements Initializable {
                     for(Rectangle rect: er){rect.setFill(Color.TRANSPARENT);}
                     for(Rectangle rect: mr){rect.setFill(Color.TRANSPARENT);}
                     for(Rectangle rect: hr){rect.setFill(Color.TRANSPARENT);}
-                    mode = 0;
+                    diff = 0;
                 }
                 if (difficulty.getSelectedToggle() == easy) {
                     for(Rectangle rect: er){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: mr){rect.setFill(Color.TRANSPARENT);}
                     for(Rectangle rect: hr){rect.setFill(Color.TRANSPARENT);}
-                    mode = 1;
+                    diff = 1;
                 }
                 else if (difficulty.getSelectedToggle() == medium) {
                     for(Rectangle rect: er){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: mr){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: hr){rect.setFill(Color.TRANSPARENT);}
-                    mode = 2;
+                    diff = 2;
                 }
                 else if (difficulty.getSelectedToggle() == hard) {
                     for(Rectangle rect: er){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: mr){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: hr){rect.setFill(Color.BLACK);}
-                    mode = 3;
+                    diff = 3;
                 }
 
             }
@@ -106,30 +111,66 @@ public class Controller implements Initializable {
         mass_changer.valueProperty().addListener(new ChangeListener<Number>() {   //for changing mass, do ewentualnej poprawy
             public void changed(ObservableValue<? extends Number> ov,
                                 Number old_val, Number new_val) {
-                ball.mass = new_val.intValue();
+                ball.mass = new_val.intValue();   //cast new_val to int
                 mass_counter.setText(String.valueOf(ball.mass));
             }
         });
 
-        new AnimationTimer()       //Main animation loop
+        AnimationTimer timer = new AnimationTimer()       //Main animation loop
         {
             public void handle(long currentNanoTime)
             {
-                DetermineForce(ball, sources);
+                DetermineForce(ball, sources, this);
                 ball.change();
                 ball.setCenterX(ball.locX);
                 ball.setCenterY(ball.locY);
-                collisionChecker(er,mr,hr,ball,mode);
+                collisionChecker(er,mr,hr,ball, this);
             }
-        }.start();
+        };
+
+
+        start.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                if(mode != 2) {
+                    timer.start();
+                    mode = 1;
+                }
+            }
+        });
+
+        pause.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                if (mode != 2) {
+                    timer.stop();
+                    mode = 0;
+                }
+            }
+        });
+
+        reset.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                ball.reset();
+                ball.setCenterX(ball.locX);
+                ball.setCenterY(ball.locY);
+                for(Source source: sources){
+                    field.getChildren().remove(source);
+                }
+                sources.clear();
+                messages.setText("");
+                mode = 0;
+                timer.stop();
+            }
+        });
 
     }
 
-    private void DetermineForce(Electron elec, ArrayList<Source> sources){
+    private void DetermineForce(Electron elec, ArrayList<Source> sources, AnimationTimer timer){
         for(Source source: sources){
             double r = Math.sqrt(Math.pow(elec.locX - source.getCenterX(),2)+Math.pow(elec.locY - source.getCenterY(),2))/1.0;
             if(r<14){   //collision check
-                System.exit(0);
+                timer.stop();
+                messages.setText("You Lost");
+                mode = 2;
             }
             double sinus = (source.getCenterX() - elec.locX)/r;
             double cosin = (source.getCenterY() - elec.locY)/r;
@@ -153,28 +194,35 @@ public class Controller implements Initializable {
         hr.add(rec1);
     }
 
-    private void collisionChecker(ArrayList<Rectangle> er ,ArrayList<Rectangle> mr,ArrayList<Rectangle> hr, Electron ball, int mode){
-        if (mode > 0){
+    private void collisionChecker(ArrayList<Rectangle> er ,ArrayList<Rectangle> mr,ArrayList<Rectangle> hr, Electron ball,
+                                  AnimationTimer timer){
+        if (diff > 0){
             for(Rectangle rect: er){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
-                    System.exit(0);
+                    timer.stop();
+                    messages.setText("You Lost");
+                    mode = 2;
                 }
             }
         }
-        if (mode > 1){
+        if (diff > 1){
             for(Rectangle rect: mr){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
-                    System.exit(0);
+                    timer.stop();
+                    messages.setText("You Lost");
+                    mode = 2;
                 }
             }
         }
-        if (mode == 3){
+        if (diff == 3){
             for(Rectangle rect: hr){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
-                    System.exit(0);
+                    timer.stop();
+                    messages.setText("You Lost");
+                    mode = 2;
                 }
             }
         }

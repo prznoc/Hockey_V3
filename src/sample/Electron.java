@@ -28,6 +28,14 @@ class Electron extends Circle {
         accX = 0;
         accY = 0;
     }
+    void reset(){
+        veloX = 0;
+        veloY = 0;
+        accX = 0;
+        accY = 0;
+        locX = 100;
+        locY = 400;
+    }
 }
 
 class Source extends Circle {
