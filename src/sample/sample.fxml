@@ -3,11 +3,11 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollBar?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
 
 <GridPane fx:id="background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <columnConstraints>
@@ -23,14 +23,18 @@
    <children>
       <ButtonBar GridPane.rowIndex="2">
          <buttons>
-            <TextField text="Difficulty:" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Difficulty:" />
             <RadioButton fx:id="peaceful" mnemonicParsing="false" selected="true" text="Peaceful" />
             <RadioButton fx:id="easy" mnemonicParsing="false" text="Easy" />
             <RadioButton fx:id="medium" mnemonicParsing="false" text="Medium" />
             <RadioButton fx:id="hard" mnemonicParsing="false" text="Hard" />
-            <ScrollBar min="1.0" value="25.0" />
+            <Text fx:id="mass_counter" strokeType="OUTSIDE" strokeWidth="0.0" text="25" />
+            <ScrollBar fx:id="mass_changer" blockIncrement="1.0" min="1.0" value="25.0" visibleAmount="1.0" />
          </buttons>
       </ButtonBar>
-      <Pane fx:id="field" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: white;" />
+      <Pane fx:id="field" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: white;">
+         <children>
+            <Text fx:id="messages" layoutX="1039.0" layoutY="93.0" strokeType="OUTSIDE" strokeWidth="0.0" />
+         </children></Pane>
    </children>
 </GridPane>

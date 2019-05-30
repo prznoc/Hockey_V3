@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
@@ -14,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,6 +30,10 @@ public class Controller implements Initializable {
     @FXML private RadioButton hard;
     private final ToggleGroup difficulty = new ToggleGroup();
     private int mode = 0;
+
+    @FXML private Text messages;
+    @FXML private Text mass_counter;
+    @FXML private ScrollBar mass_changer;
 
     private final int k = 100000000;   //constant required for long range
     @Override
@@ -65,7 +71,7 @@ public class Controller implements Initializable {
             }
         });
 
-        difficulty.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+        difficulty.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){  //for changing difficulty
             public void changed(ObservableValue<? extends Toggle> ov,
                                 Toggle old_toggle, Toggle new_toggle) {
 
@@ -97,6 +103,14 @@ public class Controller implements Initializable {
             }
         });
 
+        mass_changer.valueProperty().addListener(new ChangeListener<Number>() {   //for changing mass, do ewentualnej poprawy
+            public void changed(ObservableValue<? extends Number> ov,
+                                Number old_val, Number new_val) {
+                ball.mass = new_val.intValue();
+                mass_counter.setText(String.valueOf(ball.mass));
+            }
+        });
+
         new AnimationTimer()       //Main animation loop
         {
             public void handle(long currentNanoTime)
@@ -120,12 +134,12 @@ public class Controller implements Initializable {
             double sinus = (source.getCenterX() - elec.locX)/r;
             double cosin = (source.getCenterY() - elec.locY)/r;
             if(source.sign == elec.sign) {
-                elec.accX -= (sinus / Math.pow(r, 2)) * k;
-                elec.accY -= (cosin / Math.pow(r, 2)) * k;
+                elec.accX -= (sinus / (Math.pow(r, 2)*elec.mass)) * k;
+                elec.accY -= (cosin / (Math.pow(r, 2)*elec.mass)) * k;
             }
             else{
-                elec.accX += (sinus / Math.pow(r, 2)) * k;
-                elec.accY += (cosin / Math.pow(r, 2)) * k;
+                elec.accX += (sinus / (Math.pow(r, 2)*elec.mass)) * k;
+                elec.accY += (cosin / (Math.pow(r, 2)*elec.mass)) * k;
             }
         }
     }

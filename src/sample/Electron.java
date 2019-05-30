@@ -11,14 +11,15 @@ class Electron extends Circle {
     double locX = 100;
     double locY = 400;
     boolean sign = true; //true +, false -
+    int mass = 25;
     Electron (int radius){
         super(radius);
         setCenterX(locX);
         setCenterY(locY);
     }
     private void changeLoc(){
-        locX += veloX/1000000.0;   //dzielnik 100x mniejszy niż stała k z klasy main
-        locY += veloY/1000000.0;
+        locX += veloX/40000.0;   //dzielnik 2500x mniejszy niż stała k z klasy main
+        locY += veloY/40000.0;
     }
     void change(){
         veloX += accX;
