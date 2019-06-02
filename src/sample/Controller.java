@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -15,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
+import javafx.util.Pair;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resource){
 
+         //creating ball
         field.getChildren().add( ball );
         ArrayList<Source> sources = new ArrayList<>();  //creating array for sources
 
@@ -72,19 +75,25 @@ public class Controller implements Initializable {
         for(Rectangle rect: hr){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
 
         field.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent me) -> {      //creating sources with mouseclicks
-            if(me.getButton().equals(MouseButton.PRIMARY)) {
-                Source source = new Source(me.getX(), me.getY(), 7,  true);
-                sources.add(source);
-                //addEventHandler(root, source);
-                field.getChildren().add(source);
-            }
-            if(me.getButton().equals(MouseButton.SECONDARY)) {
-                Source source = new Source(me.getX(), me.getY(), 7, false);
-                sources.add(source);
-                //addEventHandler(root, source);
-                field.getChildren().add(source);
+            if (! (me.getPickResult().getIntersectedNode() instanceof Source)) {
+                if (me.getButton().equals(MouseButton.PRIMARY)) {
+                    Source source = new Source(me.getX(), me.getY(), 7, true);
+                    sources.add(source);
+                    addEventHandler(source);
+                    field.getChildren().add(source);
+
+
+                }
+                if (me.getButton().equals(MouseButton.SECONDARY)) {
+                    Source source = new Source(me.getX(), me.getY(), 7, false);
+                    sources.add(source);
+                    addEventHandler(source);
+                    field.getChildren().add(source);
+                }
             }
         });
+
+
 
         difficulty.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){  //for changing difficulty
             public void changed(ObservableValue<? extends Toggle> ov,
@@ -180,6 +189,12 @@ public class Controller implements Initializable {
 
     }
 
+    private void addEventHandler(Node node) {
+        node.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent me) -> {
+            field.getChildren().remove(node);
+        });
+    }
+
     private void display_arrow(){
         ;
     }
@@ -187,6 +202,7 @@ public class Controller implements Initializable {
     private void change_electron(double[] results){
         ball.accX = results[0];
         ball.accY = results[1];
+
     }
 
     private double[] DetermineForce(ArrayList<Source> sources, AnimationTimer timer){
