@@ -42,7 +42,7 @@ class Electron extends Circle {
     }
 
     void change_sign(){
-        if (sign == true) sign =false;
+        if (sign) sign = false;
         else sign = true;
     }
 
