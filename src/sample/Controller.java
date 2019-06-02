@@ -34,7 +34,7 @@ public class Controller implements Initializable {
 
     @FXML private Text messages;
     @FXML private Text mass_counter;
-    @FXML private ScrollBar mass_changer;
+    @FXML private Slider mass_changer;
 
     @FXML private Button start;
     @FXML private Button reset;
@@ -45,10 +45,12 @@ public class Controller implements Initializable {
     private ArrayList<Rectangle> mr = new ArrayList<>();
     private ArrayList<Rectangle> hr = new ArrayList<>();
 
+    @FXML private ToggleButton ball_sign_toggle;
+    private Electron ball = new Electron( 7 );
+
     @Override
     public void initialize(URL url, ResourceBundle resource){
 
-        Electron ball = new Electron( 7 );  //creating ball
         field.getChildren().add( ball );
         ArrayList<Source> sources = new ArrayList<>();  //creating array for sources
 
@@ -116,6 +118,7 @@ public class Controller implements Initializable {
             }
         });
 
+
         mass_changer.valueProperty().addListener(new ChangeListener<Number>() {   //for changing mass, do ewentualnej poprawy
             public void changed(ObservableValue<? extends Number> ov,
                                 Number old_val, Number new_val) {
@@ -123,18 +126,18 @@ public class Controller implements Initializable {
                 mass_counter.setText(String.valueOf(ball.mass));
             }
         });
-
         AnimationTimer timer = new AnimationTimer()       //Main animation loop
         {
             public void handle(long currentNanoTime)
             {
-                DetermineForce(ball, sources, this);
+                double[] results = DetermineForce(sources, this);
+                change_electron(results);
                 ball.change();
                 ball.setCenterX(ball.locX);
                 ball.setCenterY(ball.locY);
-                boundary_checker(ball, this);
-                collision_checker(ball, this);
-                goal_check(post1,post2,backpost,ball, this);
+                boundary_checker(this);
+                collision_checker(this);
+                goal_check(post1,post2,backpost,this);
             }
         };
 
@@ -171,29 +174,44 @@ public class Controller implements Initializable {
                 timer.stop();
             }
         });
+        ball_sign_toggle.setOnAction(e -> {
+            ball.change_sign();
+        });
 
     }
 
-    private void DetermineForce(Electron elec, ArrayList<Source> sources, AnimationTimer timer){
+    private void display_arrow(){
+        ;
+    }
+
+    private void change_electron(double[] results){
+        ball.accX = results[0];
+        ball.accY = results[1];
+    }
+
+    private double[] DetermineForce(ArrayList<Source> sources, AnimationTimer timer){
+        double[] results = {0,0};
         for(Source source: sources){
             final int k = 100000000;   //constant required for long range
-            double r = Math.sqrt(Math.pow(elec.locX - source.getCenterX(),2)+Math.pow(elec.locY - source.getCenterY(),2))/1.0;
+            double r = Math.sqrt(Math.pow(ball.locX - source.getCenterX(),2)+Math.pow(ball.locY - source.getCenterY(),2))/1.0;
             if(r<14){   //collision check
                 timer.stop();
                 messages.setText("You Lost");
                 mode = 2;
             }
-            double sinus = (source.getCenterX() - elec.locX)/r;
-            double cosin = (source.getCenterY() - elec.locY)/r;
-            if(source.sign == elec.sign) {
-                elec.accX -= (sinus / (Math.pow(r, 2)*elec.mass)) * k;
-                elec.accY -= (cosin / (Math.pow(r, 2)*elec.mass)) * k;
+            double sinus = (source.getCenterX() - ball.locX)/r;
+            double cosin = (source.getCenterY() - ball.locY)/r;
+
+            if(source.sign == ball.sign) {
+                results[0] -= (sinus / (Math.pow(r, 2)*ball.mass)) * k;
+                results[1] -= (cosin / (Math.pow(r, 2)*ball.mass)) * k;
             }
             else{
-                elec.accX += (sinus / (Math.pow(r, 2)*elec.mass)) * k;
-                elec.accY += (cosin / (Math.pow(r, 2)*elec.mass)) * k;
+                results[0] += (sinus / (Math.pow(r, 2)*ball.mass)) * k;
+                results[1] += (cosin / (Math.pow(r, 2)*ball.mass)) * k;
             }
         }
+        return results;
     }
 
     private void addRectangles(){
@@ -205,7 +223,7 @@ public class Controller implements Initializable {
         hr.add(rec1);
     }
 
-    private void collision_checker(Electron ball, AnimationTimer timer){
+    private void collision_checker(AnimationTimer timer){
         if (diff > 0){
             for(Rectangle rect: er){
                 Shape intersect = Shape.intersect(rect, ball);
@@ -238,7 +256,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private void goal_check(Rectangle post1, Rectangle post2, Rectangle backpost, Electron ball, AnimationTimer timer){
+    private void goal_check(Rectangle post1, Rectangle post2, Rectangle backpost, AnimationTimer timer){
         Shape intersect1 = Shape.intersect(post1, ball);
         Shape intersect2 = Shape.intersect(post2, ball);
         Shape intersect_back = Shape.intersect(backpost, ball);
@@ -257,7 +275,7 @@ public class Controller implements Initializable {
         mode = 2;
     }
 
-    private void boundary_checker(Electron ball, AnimationTimer timer){
+    private void boundary_checker(AnimationTimer timer){
         if(ball.locX < 0 || ball.locY > 1200 || ball.locY < 0 || ball.locY > 800){
             timer.stop();
             messages.setText("You lost");

@@ -41,6 +41,11 @@ class Electron extends Circle {
         else veloY = veloY*(-1);
     }
 
+    void change_sign(){
+        if (sign == true) sign =false;
+        else sign = true;
+    }
+
     void pounce(){
         veloX = veloX * (-1);
     }
