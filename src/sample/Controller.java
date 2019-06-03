@@ -47,6 +47,16 @@ public class Controller implements Initializable {
     private ArrayList<Rectangle> mr = new ArrayList<>();
     private ArrayList<Rectangle> hr = new ArrayList<>();
 
+    @FXML private Rectangle barrier1;
+    @FXML private Rectangle barrier21;
+    @FXML private Rectangle barrier22;
+    @FXML private Rectangle barrier31;
+    @FXML private Rectangle barrier32;
+    @FXML private Rectangle barrier33;
+    @FXML private Rectangle barrier34;
+    @FXML private Rectangle barrier35;
+    @FXML private Rectangle barrier36;
+
     @FXML private ToggleButton ball_sign_toggle;
     private Electron ball = new Electron( 7 );
 
@@ -70,9 +80,9 @@ public class Controller implements Initializable {
         field.getChildren().add(backpost);
 
         addRectangles();
-        for(Rectangle rect: er){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
-        for(Rectangle rect: mr){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
-        for(Rectangle rect: hr){field.getChildren().add(rect); rect.setFill(Color.TRANSPARENT);}
+        for(Rectangle rect: er){rect.setFill(Color.TRANSPARENT);}
+        for(Rectangle rect: mr){rect.setFill(Color.TRANSPARENT);}
+        for(Rectangle rect: hr){rect.setFill(Color.TRANSPARENT);}
 
         field.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent me) -> {      //creating sources with mouseclicks
             if (! (me.getPickResult().getIntersectedNode() instanceof Source)) {
@@ -112,14 +122,14 @@ public class Controller implements Initializable {
                     diff = 1;
                 }
                 else if (difficulty.getSelectedToggle() == medium) {
-                    for(Rectangle rect: er){rect.setFill(Color.BLACK);}
+                    for(Rectangle rect: er){rect.setFill(Color.TRANSPARENT);}
                     for(Rectangle rect: mr){rect.setFill(Color.BLACK);}
                     for(Rectangle rect: hr){rect.setFill(Color.TRANSPARENT);}
                     diff = 2;
                 }
                 else if (difficulty.getSelectedToggle() == hard) {
-                    for(Rectangle rect: er){rect.setFill(Color.BLACK);}
-                    for(Rectangle rect: mr){rect.setFill(Color.BLACK);}
+                    for(Rectangle rect: er){rect.setFill(Color.TRANSPARENT);}
+                    for(Rectangle rect: mr){rect.setFill(Color.TRANSPARENT);}
                     for(Rectangle rect: hr){rect.setFill(Color.BLACK);}
                     diff = 3;
                 }
@@ -231,16 +241,19 @@ public class Controller implements Initializable {
     }
 
     private void addRectangles(){
-        Rectangle rec1 = new Rectangle(300,100,3,700);
-        Rectangle rec2 = new Rectangle(500,100,3,700);
-        Rectangle rec3 = new Rectangle(700,100,3,700);
-        er.add(rec3);
-        mr.add(rec2);
-        hr.add(rec1);
+        er.add(barrier1);
+        mr.add(barrier21);
+        mr.add(barrier22);
+        hr.add(barrier31);
+        hr.add(barrier32);
+        hr.add(barrier33);
+        hr.add(barrier34);
+        hr.add(barrier35);
+        hr.add(barrier36);
     }
 
     private void collision_checker(AnimationTimer timer){
-        if (diff > 0){
+        if (diff == 1){
             for(Rectangle rect: er){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
@@ -250,7 +263,7 @@ public class Controller implements Initializable {
                 }
             }
         }
-        if (diff > 1){
+        else if (diff == 2){
             for(Rectangle rect: mr){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
@@ -260,7 +273,7 @@ public class Controller implements Initializable {
                 }
             }
         }
-        if (diff == 3){
+        else if (diff == 3){
             for(Rectangle rect: hr){
                 Shape intersect = Shape.intersect(rect, ball);
                 if (intersect.getBoundsInLocal().getWidth() != -1) {
@@ -292,7 +305,7 @@ public class Controller implements Initializable {
     }
 
     private void boundary_checker(AnimationTimer timer){
-        if(ball.locX < 0 || ball.locY > 1200 || ball.locY < 0 || ball.locY > 800){
+        if(ball.locX < 0 || ball.locX > 1200 || ball.locY < 0 || ball.locY > 800){
             timer.stop();
             messages.setText("You lost");
             mode = 2;
