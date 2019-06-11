@@ -4,22 +4,31 @@ import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
 
 class Electron extends Circle {
-    private double veloX = 0;
-    private double veloY = 0;
+    double veloX = 0;
+    double veloY = 0;
     double accX = 0;
     double accY = 0;
     double locX = 100;
     double locY = 400;
+    double plocX = 100;
+    double plocY = 400;
     boolean sign = true; //true +, false -
     int mass = 25;
+    double vMax=19*40000;
     Electron (int radius){
         super(radius);
         setCenterX(locX);
         setCenterY(locY);
     }
     private void changeLoc(){
-        locX += veloX/40000.0;   //dzielnik 2500x mniejszy niż stała k z klasy main
-        locY += veloY/40000.0;
+        double cX=veloX;
+        double cY=veloY;
+        plocX=locX;
+        plocY=locY;
+        if(veloX>vMax) cX = vMax;
+        if(veloY>vMax) cY = vMax;
+        locX += cX/40000.0;   //dzielnik 2500x mniejszy niż stała k z klasy main
+        locY += cY/40000.0;
     }
     void change(){
         veloX += accX;
@@ -35,9 +44,13 @@ class Electron extends Circle {
         accY = 0;
         locX = 100;
         locY = 400;
+        plocX = 100;
+        plocY = 400;
     }
     void bounce(){
-        if (locX < 1100 || locX >1150) veloX = veloX * (-1);
+        if (plocX < 1100 || plocX >1150) {
+            veloX = veloX * (-1);
+        }
         else veloY = veloY*(-1);
     }
 
